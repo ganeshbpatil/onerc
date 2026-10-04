@@ -95,7 +95,7 @@ chmod 600 "$ENV_FILE"
 chown -R "$APP_USER":"$APP_USER" "$APP_DIR"
 # make the source readable by the app user
 SRC_COPY="$APP_DIR/source"
-rm -rf "$SRC_COPY" && mkdir -p "$SRC_COPY"
+rm -rf "${SRC_COPY:?}" && mkdir -p "$SRC_COPY"
 tar -C "$SRC_DIR" --exclude=node_modules --exclude=.next --exclude=.git -cf - . | tar -C "$SRC_COPY" -xf -
 chown -R "$APP_USER":"$APP_USER" "$SRC_COPY"
 

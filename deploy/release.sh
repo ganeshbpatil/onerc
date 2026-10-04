@@ -18,7 +18,9 @@ mkdir -p "$RELEASE"
 tar -C "$SOURCE_DIR" --exclude=node_modules --exclude=.next --exclude=.git --exclude='*.tar.gz' -cf - . | tar -C "$RELEASE" -xf -
 
 # Shared, persistent assets (downloaded once, reused by every release)
-rm -rf "$RELEASE/public/images" "$RELEASE/private"
+# ${RELEASE:?} aborts if the variable is ever empty, so this can never touch /public or /private.
+mkdir -p "${RELEASE:?}/public"
+rm -rf "${RELEASE:?}/public/images" "${RELEASE:?}/private"
 ln -sfn "$APP_DIR/shared/images" "$RELEASE/public/images"
 ln -sfn "$APP_DIR/shared/private" "$RELEASE/private"
 ln -sfn "$APP_DIR/shared/.env.production" "$RELEASE/.env.production"
