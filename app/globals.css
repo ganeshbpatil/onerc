@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/* ── Primitive tokens ─────────────────────────────────────────────── */
+:root {
+  --lime-plaster: #eceae4;
+  --paper: #f6f5f1;
+  --stone: #d6d2c8;
+  --stone-strong: #b9b5ab;
+  --concrete: #8c8b84;
+  --basalt: #191b19;
+  --slate-moss: #4e514b;
+  --banyan: #22392c;
+  --banyan-300: #8fa394;
+  --banyan-100: #d3dad2;
+  --brass: #a9742b;
+  --brass-ink: #8a5d1f;
+  --brass-light: #c9a46a;
+  --night: #121412;
+  --night-raised: #1e211e;
+  --mist: #e9e7e1;
+  --mist-2: #a7a9a1;
+  --signal-error: #9b2c1f;
+
+  /* ── Semantic tokens ──────────────────────────────────────────── */
+  --color-background: var(--lime-plaster);
+  --color-surface: var(--paper);
+  --color-surface-inverse: var(--night);
+  --color-text-primary: var(--basalt);
+  --color-text-secondary: var(--slate-moss);
+  --color-text-inverse: var(--mist);
+  --color-text-inverse-2: var(--mist-2);
+  --color-accent: var(--banyan);
+  --color-highlight: var(--brass);
+  --color-highlight-text: var(--brass-ink);
+  --color-border: var(--stone);
+  --color-rule: var(--basalt);
+  --color-focus: var(--brass);
+  --color-overlay: rgb(18 20 18 / 0.55);
+
+  --ease-out-arch: cubic-bezier(0.2, 0.7, 0.1, 1);
+  --header-h: 64px;
+}
+
+/* Expose tokens to Tailwind utilities (bg-background, text-secondary, …) */
+@theme inline {
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-inverse: var(--color-surface-inverse);
+  --color-raised: var(--night-raised);
+  --color-primary: var(--color-text-primary);
+  --color-secondary: var(--color-text-secondary);
+  --color-on-inverse: var(--color-text-inverse);
+  --color-on-inverse-2: var(--color-text-inverse-2);
+  --color-accent: var(--color-accent);
+  --color-accent-300: var(--banyan-300);
+  --color-accent-100: var(--banyan-100);
+  --color-highlight: var(--color-highlight);
+  --color-highlight-text: var(--color-highlight-text);
+  --color-highlight-light: var(--brass-light);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--stone-strong);
+  --color-rule: var(--color-rule);
+  --color-error: var(--signal-error);
+  --color-paper: var(--paper);
+
+  --font-display: var(--font-instrument), "Times New Roman", serif;
+  --font-sans: var(--font-hanken), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --radius-none: 0;
+}
+
+@layer base {
+  html { scroll-behavior: smooth; scroll-padding-top: var(--header-h); -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--color-background);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (min-width: 1024px) { body { font-size: 1.0625rem; } }
+  ::selection { background: var(--banyan); color: var(--paper); }
+  :focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+  img { max-width: 100%; height: auto; }
+}
+
+@layer components {
+  .container-arch { width: 100%; max-width: 1360px; margin-inline: auto; padding-inline: clamp(16px, 4vw, 40px); }
+  .section-y { padding-block: clamp(80px, 11vw, 160px); }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; }
+  .t-display { font-family: var(--font-display); font-weight: 400; font-size: clamp(3.25rem, 8.4vw, 8.25rem); line-height: 0.94; letter-spacing: -0.025em; }
+  .t-h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.5rem, 5.6vw, 5.25rem); line-height: 1; letter-spacing: -0.02em; text-wrap: balance; }
+  .t-h3 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.75rem, 2.6vw, 2.25rem); line-height: 1.15; }
+  .lead { font-size: clamp(1.125rem, 1.4vw, 1.1875rem); line-height: 1.6; text-wrap: pretty; }
+  .hatch { background-color: #c9c5ba; background-image: repeating-linear-gradient(135deg, rgb(25 27 25 / 0.06) 0 1px, transparent 1px 14px); }
+  .hatch-dark { background-color: var(--night-raised); background-image: repeating-linear-gradient(135deg, rgb(233 231 225 / 0.05) 0 1px, transparent 1px 14px); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 48px; padding: 0 1.5rem; font-weight: 500; font-size: 0.9375rem; letter-spacing: 0.01em; transition: background-color 200ms var(--ease-out-arch), color 200ms var(--ease-out-arch), border-color 200ms var(--ease-out-arch); }
+  .btn-primary { background: var(--color-accent); color: var(--paper); }
+  .btn-primary:hover { background: var(--basalt); }
+  .btn-ghost { border: 1px solid var(--color-rule); color: var(--color-text-primary); }
+  .btn-ghost:hover { background: var(--basalt); color: var(--paper); }
+  .btn-light { background: var(--mist); color: var(--basalt); }
+  .btn-light:hover { background: var(--paper); }
+  .btn-outline-light { border: 1px solid var(--mist-2); color: var(--mist); }
+  .btn-outline-light:hover { background: var(--mist); color: var(--basalt); }
+  .link-u { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+}
+
+/* ── Motion ─────────────────────────────────────────────────────── */
+@keyframes hero-in { from { transform: scale(1.04); } to { transform: scale(1); } }
+/* No opacity in entrance keyframes: elements at opacity 0 are excluded from LCP and delay it. */
+@keyframes rise { from { transform: translateY(24px); } to { transform: none; } }
+.anim-hero { animation: hero-in 1600ms var(--ease-out-arch) both; }
+.anim-rise { animation: rise 900ms var(--ease-out-arch) both; }
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 700ms var(--ease-out-arch), transform 700ms var(--ease-out-arch); }
+.reveal[data-visible="true"] { opacity: 1; transform: none; }
+.no-js .reveal { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  .reveal { opacity: 1; transform: none; }
+}
