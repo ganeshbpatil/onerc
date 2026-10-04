@@ -12,12 +12,45 @@ import type { AdapterResult, LeadAdapter } from "../types";
  */
 type FieldKey = keyof LeadRecord;
 
+/**
+ * Field link names of SKYi's existing Zoho web-to-lead forms (same schema as the
+ * live 5 Racecourse form), so a cloned "One Racecourse" form works without remapping.
+ */
 const DEFAULT_MAP: Partial<Record<FieldKey, string>> = {
   firstName: "Name_First",
   lastName: "Name_Last",
   mobile: "PhoneNumber_countrycode",
   email: "Email",
+  utmSource: "utm_source",
+  utmMedium: "utm_medium",
+  utmCampaign: "utm_campaign",
+  utmTerm: "utm_term",
+  utmContent: "utm_content",
+  gclid: "gclid",
+  fbclid: "fbclid",
+  landingPath: "landing_page",
+  referrer: "referrer",
 };
+
+/** Hidden routing fields SKYi's CRM expects on every web lead. Override with ZOHO_FORMS_STATIC_FIELDS. */
+const DEFAULT_STATIC: Record<string, string> = {
+  Project: "One Racecourse",
+  SingleLine: "ONE RACECOURSE", // Sales Project
+  SingleLine1: "Direct", // Reference Source
+  SingleLine2: "DIGITAL", // Lead Source
+  SingleLine3: "SKYi Websites", // Sub Source
+  SingleLine8: "Digital", // Origin
+};
+
+export function parseStaticFields(raw: string | undefined): Record<string, string> {
+  if (!raw) return DEFAULT_STATIC;
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    return Object.fromEntries(Object.entries(parsed).filter(([, v]) => typeof v === "string")) as Record<string, string>;
+  } catch {
+    throw new Error("ZOHO_FORMS_STATIC_FIELDS is not valid JSON");
+  }
+}
 
 export function parseFieldMap(raw: string | undefined): Partial<Record<FieldKey, string>> {
   if (!raw) return DEFAULT_MAP;
@@ -31,12 +64,14 @@ export function parseFieldMap(raw: string | undefined): Partial<Record<FieldKey,
   }
 }
 
-export function buildZohoFormBody(lead: LeadRecord, map: Partial<Record<FieldKey, string>>): URLSearchParams {
-  const body = new URLSearchParams();
+export function buildZohoFormBody(lead: LeadRecord, map: Partial<Record<FieldKey, string>>, staticFields: Record<string, string> = {}): FormData {
+  // multipart/form-data — identical to the encoding of Zoho's own embed code
+  const body = new FormData();
   // hidden fields Zoho's embed code expects
   body.set("zf_referrer_name", "");
   body.set("zf_redirect_url", "");
   body.set("zc_gad", "");
+  for (const [k, v] of Object.entries(staticFields)) body.set(k, v);
   for (const [key, zohoField] of Object.entries(map) as [FieldKey, string][]) {
     const value = lead[key];
     if (value === undefined || value === null || value === "") continue;
@@ -56,10 +91,9 @@ export class ZohoFormsAdapter implements LeadAdapter {
   }
 
   async submit(lead: LeadRecord, signal: AbortSignal): Promise<AdapterResult> {
-    const body = buildZohoFormBody(lead, parseFieldMap(process.env.ZOHO_FORMS_FIELD_MAP));
+    const body = buildZohoFormBody(lead, parseFieldMap(process.env.ZOHO_FORMS_FIELD_MAP), parseStaticFields(process.env.ZOHO_FORMS_STATIC_FIELDS));
     const res = await fetch(this.url!, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body,
       redirect: "manual", // Zoho answers a successful submit with a 302 to its thank-you page
       signal,

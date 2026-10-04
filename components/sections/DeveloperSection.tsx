@@ -8,7 +8,7 @@ export function DeveloperSection({ standalone = false }: { standalone?: boolean 
       <div className="flex flex-wrap gap-x-20 gap-y-10 border-t border-rule pt-8">
         <div className="flex-[1_1_320px]">
           <p className="eyebrow text-secondary">06 — The developer</p>
-          <H id="h-dev" className="mt-4 font-display text-[clamp(2.25rem,4.4vw,3.75rem)] leading-[1.02]">{developer.heading}</H>
+          <H id="h-dev" className="mt-4 font-display text-[clamp(2rem,3.6vw,3rem)] font-medium leading-[1.05] tracking-[-0.03em]">{developer.heading}</H>
           <p className="mt-6 max-w-[460px] text-secondary">{developer.body}</p>
         </div>
         <dl className="grid min-w-0 flex-[999_1_560px] sm:grid-cols-2 lg:grid-cols-3">

@@ -5,8 +5,12 @@ export const CONTENT_REQUIRED = "[CONTENT REQUIRED]" as const;
 export type Sourced<T> = { value: T; source: string; verify?: string };
 
 export type ImageAsset = {
-  /** Path under /public. Undefined → a labelled placeholder renders. */
+  /** File name under public/images (see scripts/assets.manifest.mjs). Missing on disk → labelled placeholder. */
+  file?: string;
+  /** Explicit src override (absolute path or URL). */
   src?: string;
+  /** "cover" crops to fill (photos); "contain" shows the whole image (plans, maps, diagrams). */
+  fit?: "cover" | "contain";
   alt: string;
   /** Shown as the placeholder label and used for asset sourcing. */
   ref: string;

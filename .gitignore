@@ -10,3 +10,8 @@ coverage/
 .DS_Store
 next-env.d.ts
 *.tsbuildinfo
+
+# assets downloaded on the server by scripts/fetch-assets.mjs
+public/images/
+private/
+*.tar.gz

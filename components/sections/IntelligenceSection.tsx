@@ -23,7 +23,7 @@ function Chart({ title, unit, max, rows, accent, bar, unitShort }: { title: stri
   return (
     <figure>
       <figcaption className="flex flex-wrap justify-between gap-3 border-b border-[rgb(233_231_225/0.2)] pb-3.5">
-        <span className="font-display text-[30px]">{title}</span>
+        <span className="font-display text-[24px] font-medium tracking-[-0.02em]">{title}</span>
         <span className="self-center font-mono text-xs uppercase text-on-inverse-2">{unit}</span>
       </figcaption>
       <ul>
@@ -48,7 +48,7 @@ function Chart({ title, unit, max, rows, accent, bar, unitShort }: { title: stri
   );
 }
 
-const landscape: ImageAsset = { alt: "Landscape axis with layered planting between the wings", ref: "RENDER · landscape axis · Treow Design Studio", kind: "cgi" };
+const landscape: ImageAsset = { file: "living-room.webp", alt: "Daylight across the living room of the One Plus Home", ref: "living room in daylight", kind: "cgi" };
 
 export function IntelligenceSection({ standalone = false }: { standalone?: boolean }) {
   const { lux, ach } = intelligence;
@@ -70,7 +70,7 @@ export function IntelligenceSection({ standalone = false }: { standalone?: boole
         <div className="mt-24 grid gap-4 md:grid-cols-3">
           <ImageFrame image={landscape} tone="dark" sizes="(min-width: 768px) 66vw, 100vw" className="min-h-[300px] md:col-span-2 md:min-h-[360px]" />
           <div className="flex flex-col gap-5 border border-[rgb(233_231_225/0.18)] p-7">
-            <p className="font-display text-[26px] leading-tight">“{intelligence.principle}”</p>
+            <p className="font-display text-[22px] font-medium leading-snug tracking-[-0.015em]">“{intelligence.principle}”</p>
             {intelligence.credits.map((c) => (
               <div key={c.role}>
                 <p className="eyebrow text-[11px] text-on-inverse-2">{c.role}</p>

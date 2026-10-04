@@ -27,6 +27,7 @@ jobs:
         env:
           NEXT_PUBLIC_SITE_URL: https://www.oneracecourse.com
           NEXT_TELEMETRY_DISABLED: "1"
+          ASSETS_OFFLINE: "1"   # CI does not download imagery; the server does
 
   deploy:
     needs: check
@@ -42,4 +43,8 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
-          script: /var/www/one-racecourse/deploy.sh ${{ github.sha }}
+          script: |
+            set -e
+            cd /var/www/one-racecourse/source
+            git fetch --depth 1 origin ${{ github.sha }} && git checkout -q FETCH_HEAD
+            APP_DIR=/var/www/one-racecourse bash deploy/release.sh /var/www/one-racecourse/source

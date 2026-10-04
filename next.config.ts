@@ -31,6 +31,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Self-contained server bundle (.next/standalone/server.js): runs under PM2 or cPanel/Passenger
+  output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
   images: {

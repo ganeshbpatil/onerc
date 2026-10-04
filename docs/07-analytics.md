@@ -48,24 +48,34 @@ Browser ─ dataLayer.push(track()) ──► GTM ──► GA4 (web) · Meta Pi
 - Campaign → visit → booking reporting in BigQuery.
 
 ## Zoho Forms setup (primary lead path)
-1. Create the form "One Racecourse — Website" with these fields. Link names are set under field properties → *Field Link Name*:
+The adapter reproduces **SKYi's existing Zoho web-to-lead form**: the same field link names, multipart encoding and hidden routing fields as the live 5 Racecourse form on Reference Website 1. A clone of that form therefore works without any remapping.
 
-| Our field | Zoho field type | Suggested link name |
+| Our field | Zoho field link name |
+|---|---|
+| firstName / lastName | `Name_First` / `Name_Last` |
+| email | `Email` |
+| mobile (E.164 digits, e.g. 919876543210) | `PhoneNumber_countrycode` |
+| utmSource / utmMedium / utmCampaign / utmTerm / utmContent | `utm_source` / `utm_medium` / `utm_campaign` / `utm_term` / `utm_content` |
+| gclid / fbclid | `gclid` / `fbclid` |
+| landingPath / referrer | `landing_page` / `referrer` |
+
+Static routing fields (`ZOHO_FORMS_STATIC_FIELDS`, defaults shown):
+
+| Field | Label in Zoho | Value |
 |---|---|---|
-| firstName / lastName | Name | `Name_First` / `Name_Last` |
-| mobile | Phone (with country code) | `PhoneNumber_countrycode` |
-| email | Email | `Email` |
-| preferredTime | Dropdown (4 options as in `PREFERRED_TIMES`) | `Dropdown1` |
-| intent | Single line (hidden) | `SingleLine` |
-| consent | Decision box | `DecisionBox` |
-| utmSource … utmTerm, gclid, fbclid, landingPath, referrer, eventId | Single line (hidden) | `SingleLine1` … `SingleLine10` |
+| `Project` | Project | One Racecourse |
+| `SingleLine` | Sales Project | ONE RACECOURSE |
+| `SingleLine1` | Reference Source | Direct |
+| `SingleLine2` | Lead Source | DIGITAL |
+| `SingleLine3` | Sub Source | SKYi Websites |
+| `SingleLine8` | Origin | Digital |
 
-2. Go to Share → Embed → **HTML** and copy the `action` URL (`…/formperma/<key>/htmlRecords/submit`) into `ZOHO_FORMS_SUBMIT_URL`.
-3. If any link names differ from the defaults, update `ZOHO_FORMS_FIELD_MAP` (JSON).
-4. Under Settings → Spam control, **turn off Zoho's CAPTCHA**. The server posts the form, and abuse is handled upstream by the rate limits, honeypot, time-to-submit check, Origin check and Zod validation.
-5. Under Integrations → **Zoho CRM**, map to the *Leads* module with Lead Source "Website – One Racecourse", map the UTM fields to CRM custom fields, and turn on assignment rules / round robin.
-6. Notifications: an instant email or Cliq message to sales, and an optional WhatsApp auto-reply through Zoho's integration.
-7. Test: submit from staging, confirm the lead appears in CRM with UTMs, then submit again with a bad Zoho URL and confirm the webhook or log fallback catches it.
+Steps for SKYi's CRM admin:
+1. Duplicate the "5Racecourse" form as "OneRacecourse" and set its CRM integration to the same Leads layout.
+2. Copy its Share → Embed → HTML `action` URL into `ZOHO_FORMS_SUBMIT_URL` in `shared/.env.production`, then run the update command in docs/05.
+3. Keep Zoho's CAPTCHA off for this form, because the server posts it. Abuse is handled upstream: rate limits, honeypot, time-to-submit check, Origin check and validation.
+4. Optional: add a *Preferred time* field and an *Enquiry type* field to the form, then add them to `ZOHO_FORMS_FIELD_MAP`, for example `{"preferredTime":"SingleLine9","intent":"SingleLine10"}`. The current SKYi form has no slot for either.
+5. Test: submit from the site, then confirm the lead appears in CRM with the Project and UTM values.
 
 ## KPI dashboard (Looker Studio on GA4 + Zoho via BigQuery)
 

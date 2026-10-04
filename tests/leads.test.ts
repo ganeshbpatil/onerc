@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
-import { buildZohoFormBody, parseFieldMap } from "@/lib/leads/adapters/zoho-forms";
+import { buildZohoFormBody, parseFieldMap, parseStaticFields } from "@/lib/leads/adapters/zoho-forms";
 import { toZohoLead } from "@/lib/leads/adapters/zoho-crm";
 import { leadSchema, toLeadRecord } from "@/lib/leads/schema";
 import { submitLead } from "@/lib/leads/service";
@@ -50,7 +50,8 @@ describe("toLeadRecord", () => {
 describe("Zoho mapping", () => {
   const rec = toLeadRecord(leadSchema.parse({ ...valid, utmSource: "meta" }), { projectId: "one-racecourse" });
   it("builds a Zoho Forms body from the field map", () => {
-    const body = buildZohoFormBody(rec, parseFieldMap('{"firstName":"Name_First","mobile":"PhoneNumber_countrycode","consent":"DecisionBox","utmSource":"SingleLine1","email":"Email"}'));
+    const body = buildZohoFormBody(rec, parseFieldMap('{"firstName":"Name_First","mobile":"PhoneNumber_countrycode","consent":"DecisionBox","utmSource":"SingleLine1","email":"Email"}'), { Project: "One Racecourse" });
+    expect(body.get("Project")).toBe("One Racecourse");
     expect(body.get("Name_First")).toBe("Ananya Rao");
     expect(body.get("PhoneNumber_countrycode")).toBe("919876543210");
     expect(body.get("DecisionBox")).toBe("true");
@@ -59,6 +60,18 @@ describe("Zoho mapping", () => {
   });
   it("throws on malformed field map", () => {
     expect(() => parseFieldMap("{bad")).toThrow();
+  });
+  it("defaults to SKYi routing fields for One Racecourse", () => {
+    const st = parseStaticFields(undefined);
+    expect(st.Project).toBe("One Racecourse");
+    expect(st.SingleLine).toBe("ONE RACECOURSE");
+    expect(JSON.stringify(st)).not.toContain("5");
+  });
+  it("uses SKYi's live field link names by default", () => {
+    const body = buildZohoFormBody(toLeadRecord(leadSchema.parse({ ...valid, utmSource: "google", gclid: "abc", landingPath: "/?utm_source=google" }), { projectId: "p" }), parseFieldMap(undefined));
+    expect(body.get("utm_source")).toBe("google");
+    expect(body.get("gclid")).toBe("abc");
+    expect(body.get("landing_page")).toBe("/?utm_source=google");
   });
   it("maps to Zoho CRM Leads", () => {
     const z = toZohoLead(rec);
@@ -109,7 +122,10 @@ describe("ZohoFormsAdapter", () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 302 }));
     expect((await a.submit(rec, new AbortController().signal)).ok).toBe(true);
     const [, init] = fetchMock.mock.calls[0]!;
-    expect(String(init?.body)).toContain("Name_First=Ananya+Rao");
+    const sent = init?.body as FormData;
+    expect(sent.get("Name_First")).toBe("Ananya Rao");
+    expect(sent.get("Project")).toBe("One Racecourse");
+    expect(sent.get("SingleLine2")).toBe("DIGITAL");
     fetchMock.mockResolvedValueOnce(new Response("err", { status: 503 }));
     expect(await a.submit(rec, new AbortController().signal)).toMatchObject({ ok: false, retryable: true });
     fetchMock.mockRestore();

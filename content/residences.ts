@@ -23,8 +23,8 @@ export const onePlus = {
     { mark: "1+2", title: "Room for what comes next", body: "The child arrives; the home was already ready. A sofa that folds into a bed, a bunk that turns one room into enough room." },
   ],
   plan: {
-    day: { image: { src: undefined, alt: "Isometric plan of the One Plus Home arranged for daytime work and living", ref: "iso-day.webp", kind: "plan" } satisfies ImageAsset, caption: "By day the bedroom becomes a work-and-play room — desk, reading chair, floor space — while the living room stays open." },
-    night: { image: { src: undefined, alt: "Isometric plan of the One Plus Home arranged for night, with the bed unfolded", ref: "iso-night.webp", kind: "plan" } satisfies ImageAsset, caption: "By night the desk vanishes and a bed appears; the wardrobe hides an entire office." },
+    day: { image: { file: "plan-day.webp", fit: "contain", alt: "Isometric plan of the One Plus Home arranged for daytime work and living", ref: "iso-day.webp", kind: "plan" } satisfies ImageAsset, caption: "By day the bedroom becomes a work-and-play room — desk, reading chair, floor space — while the living room stays open." },
+    night: { image: { file: "plan-night.webp", fit: "contain", alt: "Isometric plan of the One Plus Home arranged for night, with the bed unfolded", ref: "iso-night.webp", kind: "plan" } satisfies ImageAsset, caption: "By night the desk vanishes and a bed appears; the wardrobe hides an entire office." },
   },
   /** Source: brochure p.70 */
   specifications: {

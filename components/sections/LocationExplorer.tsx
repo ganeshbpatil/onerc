@@ -9,7 +9,9 @@ import { ImageFrame } from "../ImageFrame";
 
 const mapImage: ImageAsset = {
   alt: "Stylised line map of Pune showing One Racecourse relative to Camp, Koregaon Park, Wanowrie and Magarpatta",
-  ref: "LINE MAP · rebuild from Location-Connectivity-Laptop.webp as SVG",
+  ref: "connectivity map",
+  file: "location-map.webp",
+  fit: "contain",
   kind: "diagram",
 };
 

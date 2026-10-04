@@ -18,7 +18,7 @@ export function HomeSection({ standalone = false }: { standalone?: boolean }) {
         <Reveal as="ul" className="mt-[72px] grid border-t border-rule md:grid-cols-3">
           {onePlus.personas.map((p) => (
             <li key={p.mark} className="border-b border-border py-7 pr-7">
-              <p className="font-display text-[64px] leading-none text-accent">{p.mark}</p>
+              <p className="font-display text-[52px] font-medium leading-none tracking-[-0.04em] text-accent">{p.mark}</p>
               <Sub className="mb-2 mt-4 text-lg font-semibold">{p.title}</Sub>
               <p className="text-base text-secondary">{p.body}</p>
             </li>

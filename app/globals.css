@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 /* ── Primitive tokens ─────────────────────────────────────────────── */
 :root {
   --lime-plaster: #eceae4;
@@ -63,15 +64,17 @@
   --color-error: var(--signal-error);
   --color-paper: var(--paper);
 
-  --font-display: var(--font-instrument), "Times New Roman", serif;
-  --font-sans: var(--font-hanken), system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --font-display: var(--font-google-sans), "Google Sans", system-ui, sans-serif;
+  --font-sans: var(--font-google-sans), "Google Sans", system-ui, sans-serif;
+  /* "mono" role = labels, data, legal — set in Montserrat (reference site's secondary face) */
+  --font-mono: var(--font-montserrat), "Montserrat", system-ui, sans-serif;
 
   --radius-none: 0;
 }
 
 @layer base {
   html { scroll-behavior: smooth; scroll-padding-top: var(--header-h); -webkit-text-size-adjust: 100%; }
+  .font-mono { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
   body {
     background: var(--color-background);
     color: var(--color-text-primary);
@@ -90,10 +93,10 @@
 @layer components {
   .container-arch { width: 100%; max-width: 1360px; margin-inline: auto; padding-inline: clamp(16px, 4vw, 40px); }
   .section-y { padding-block: clamp(80px, 11vw, 160px); }
-  .eyebrow { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; }
-  .t-display { font-family: var(--font-display); font-weight: 400; font-size: clamp(3.25rem, 8.4vw, 8.25rem); line-height: 0.94; letter-spacing: -0.025em; }
-  .t-h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.5rem, 5.6vw, 5.25rem); line-height: 1; letter-spacing: -0.02em; text-wrap: balance; }
-  .t-h3 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.75rem, 2.6vw, 2.25rem); line-height: 1.15; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; }
+  .t-display { font-family: var(--font-display); font-weight: 500; font-size: clamp(2.75rem, 6.6vw, 6.5rem); line-height: 1; letter-spacing: -0.035em; }
+  .t-h2 { font-family: var(--font-display); font-weight: 500; font-size: clamp(2.125rem, 4.4vw, 4rem); line-height: 1.05; letter-spacing: -0.03em; text-wrap: balance; }
+  .t-h3 { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.5rem, 2.2vw, 1.875rem); line-height: 1.2; letter-spacing: -0.015em; }
   .lead { font-size: clamp(1.125rem, 1.4vw, 1.1875rem); line-height: 1.6; text-wrap: pretty; }
   .hatch { background-color: #c9c5ba; background-image: repeating-linear-gradient(135deg, rgb(25 27 25 / 0.06) 0 1px, transparent 1px 14px); }
   .hatch-dark { background-color: var(--night-raised); background-image: repeating-linear-gradient(135deg, rgb(233 231 225 / 0.05) 0 1px, transparent 1px 14px); }

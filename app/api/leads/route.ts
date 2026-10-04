@@ -1,5 +1,6 @@
 import { after, NextResponse, type NextRequest } from "next/server";
 import { sendServerConversions } from "@/lib/analytics/server";
+import { brochureLink } from "@/lib/brochure";
 import { leadSchema, toLeadRecord } from "@/lib/leads/schema";
 import { submitLead } from "@/lib/leads/service";
 import { rateLimit } from "@/lib/rate-limit";
@@ -66,6 +67,6 @@ export async function POST(req: NextRequest) {
   const clientId = req.cookies.get("_ga")?.value.split(".").slice(-2).join(".");
   after(() => sendServerConversions(record, { url: req.headers.get("referer") ?? "", clientId }));
 
-  const brochureUrl = record.intent === "brochure" || record.intent === "price" ? process.env.BROCHURE_URL : undefined;
+  const brochureUrl = record.intent === "brochure" || record.intent === "price" ? brochureLink() : undefined;
   return NextResponse.json({ ok: true, brochureUrl });
 }

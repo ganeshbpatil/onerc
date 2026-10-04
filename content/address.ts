@@ -5,7 +5,8 @@ export const addressIntro = {
   body: "An address was never about how loudly it announces itself. Only how long it's been known. One Racecourse begins there — at Uday Baug, opposite Sopan Baug, inside the Cantonment's quiet standing.",
   image: {
     alt: "Century-old trees along a pathway in the Empress Botanical Garden, Pune",
-    ref: "Empress-Botanical-Garden_1.webp · externally sourced",
+    ref: "Empress Botanical Garden · externally sourced",
+    file: "heritage-empress-garden-1.webp",
     kind: "photo-external",
   } satisfies ImageAsset,
 };
@@ -20,12 +21,12 @@ export const natureStats = [
 
 /** Source: Site A heritage section. */
 export const heritage = [
-  { year: 1817, name: "The Camp" },
-  { year: 1838, name: "Empress Botanical Garden" },
-  { year: 1850, name: "Uday & Sopan Baug" },
-  { year: 1855, name: "St. Patrick's Cathedral" },
-  { year: 1895, name: "The Southern Command" },
-  { year: 1948, name: "The SRPF" },
+  { year: 1817, name: "The Camp", file: "heritage-the-camp-1.webp" },
+  { year: 1838, name: "Empress Botanical Garden", file: "heritage-empress-garden-2.webp" },
+  { year: 1850, name: "Uday & Sopan Baug", file: "heritage-uday-sopan-baug-1.webp" },
+  { year: 1855, name: "St. Patrick's Cathedral", file: "heritage-st-patricks-1.webp" },
+  { year: 1895, name: "The Southern Command", file: "heritage-southern-command-1.webp" },
+  { year: 1948, name: "The SRPF", file: "heritage-srpf.png" },
 ] as const;
 
 export const heritageIntro =

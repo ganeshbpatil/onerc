@@ -15,7 +15,7 @@ export function MobileNav() {
       </DialogTrigger>
       <DialogContent overlayClassName="bg-transparent" className="inset-0 flex flex-col bg-inverse px-4 pb-8 pt-3 text-on-inverse">
         <div className="flex h-[52px] items-center justify-between">
-          <DialogTitle className="font-display text-2xl">{project.wordmark}</DialogTitle>
+          <DialogTitle className="font-display text-[21px] font-medium tracking-[-0.025em]">{project.wordmark}</DialogTitle>
           <button type="button" onClick={() => setOpen(false)} aria-label="Close menu" className="grid size-11 place-items-center">
             <CloseIcon />
           </button>
@@ -24,13 +24,13 @@ export function MobileNav() {
           <ul className="flex flex-col">
             {nav.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} onClick={() => setOpen(false)} className="block py-1.5 font-display text-[40px] leading-tight">
+                <Link href={item.href} onClick={() => setOpen(false)} className="block py-1.5 font-display text-[34px] font-medium tracking-[-0.03em] leading-tight">
                   {item.label}
                 </Link>
               </li>
             ))}
             <li>
-              <Link href="/#visit" onClick={() => setOpen(false)} className="mt-6 block py-1.5 font-display text-[40px] italic leading-tight text-highlight-light">
+              <Link href="/#visit" onClick={() => setOpen(false)} className="mt-6 block py-1.5 font-display text-[34px] font-medium tracking-[-0.03em] leading-tight text-highlight-light">
                 Schedule a visit
               </Link>
             </li>

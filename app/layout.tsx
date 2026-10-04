@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Hanken_Grotesk, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
+import { Montserrat } from "next/font/google";
+import localFont from "next/font/local";
 import { Analytics } from "@/components/Analytics";
 import { CookieConsent } from "@/components/CookieConsent";
 import { Footer } from "@/components/Footer";
@@ -10,10 +11,19 @@ import { project, site } from "@/content/project";
 import { organizationSchema, websiteSchema } from "@/lib/seo/schema";
 import "./globals.css";
 
-const instrument = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-instrument", display: "swap" });
-// Hanken is variable: one file covers 400–600. Mono and italic are not above the fold-critical path → no preload.
-const hanken = Hanken_Grotesk({ subsets: ["latin"], variable: "--font-hanken", display: "swap" });
-const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: "400", variable: "--font-plex-mono", display: "swap", preload: false });
+// Reference typography (SKYi site): Google Sans for display + text, Montserrat for labels/data.
+// Google Sans (SIL OFL 1.1, app/fonts/GoogleSans-OFL.txt) is self-hosted as a single Latin variable
+// file (400–700, 36 KB): Google Fonts' build adds a control-character subset that delays first paint.
+const googleSans = localFont({
+  src: "./fonts/GoogleSans-Latin-Variable.woff2",
+  weight: "400 700",
+  style: "normal",
+  variable: "--font-google-sans",
+  display: "swap",
+  adjustFontFallback: "Arial",
+  fallback: ["Arial", "sans-serif"],
+});
+const montserrat = Montserrat({ subsets: ["latin"], weight: "variable", variable: "--font-montserrat", display: "swap", preload: false });
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -31,7 +41,7 @@ export const viewport: Viewport = { themeColor: "#eceae4", width: "device-width"
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en-IN" className={`${instrument.variable} ${hanken.variable} ${plexMono.variable}`}>
+    <html lang="en-IN" className={`${googleSans.variable} ${montserrat.variable}`}>
       <body>
         <Analytics />
         <JsonLd data={[organizationSchema(), websiteSchema()]} />

@@ -7,7 +7,7 @@ export function Footer() {
       <div className="container-arch pb-10 pt-[72px]">
         <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-10">
           <div>
-            <p className="font-display text-[32px] leading-none text-on-inverse">{project.wordmark}</p>
+            <p className="font-display text-[26px] font-medium leading-none tracking-[-0.025em] text-on-inverse">{project.wordmark}</p>
             <address className="mt-3 not-italic">
               {project.address.street}, {project.address.locality}, {project.address.region}
             </address>

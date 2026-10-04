@@ -1,13 +1,24 @@
 # One Racecourse by SKYi — launch website
 
-Next.js 16 (App Router, TypeScript, Tailwind v4, shadcn/ui-style Radix primitives). Every page is statically generated. Leads route through Zoho Forms, with Zoho CRM API, webhook and log fallbacks.
+## Deploy to a server (one command)
+
+```bash
+scp one-racecourse-deploy-*.tar.gz root@SERVER:/root/ && ssh root@SERVER
+tar -xzf one-racecourse-deploy-*.tar.gz && cd one-racecourse
+DOMAIN=oneracecourse.com EMAIL=it@skyi.com bash deploy/install.sh
+```
+
+This installs NGINX, Node 22, PM2 and SSL, downloads every image and the brochure from the reference sites, builds, and starts the site. Details are in [docs/05-deployment.md](docs/05-deployment.md). Build the package with `npm run package`.
+
+Next.js 16 (App Router, TypeScript, Tailwind v4, shadcn/ui-style Radix primitives), typeset in the SKYi reference fonts (Google Sans + Montserrat). Every page is statically generated. Leads route through Zoho Forms, with Zoho CRM API, webhook and log fallbacks.
 
 ```bash
 cp .env.example .env.local   # fill values; works with none (leads go to the log adapter)
 npm ci
 npm run dev                  # http://localhost:3000
 npm run check                # lint + typecheck + unit tests
-npm run build && npm start
+npm run assets               # download images + brochure from the reference sites
+npm run build && npm start   # standalone server on :3000
 ```
 
 ## Structure
@@ -34,7 +45,7 @@ Never invent prices, dates, distances, awards or testimonials. Missing facts sta
 grep -rn "CONTENT REQUIRED\|VERIFY" content app components
 ```
 
-To add real imagery, place the files in `public/images/` and set `src` on the matching asset in `content/*.ts`. `ImageFrame` then switches from the labelled placeholder to an optimised `next/image` (AVIF/WebP).
+Images are downloaded by `npm run assets` (also run automatically before every build) into `public/images/`, under the local names in `scripts/assets.manifest.mjs`. `ImageFrame` renders an optimised `next/image` (AVIF/WebP) when the file exists and a labelled placeholder when it doesn't.
 
 ## QA
 

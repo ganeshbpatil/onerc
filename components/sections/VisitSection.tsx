@@ -11,7 +11,7 @@ export function VisitSection({ standalone = false }: { standalone?: boolean }) {
       <div className="container-arch section-y flex flex-wrap gap-x-20 gap-y-14">
         <div className="flex-[1_1_380px]">
           <p className="eyebrow text-[#b9c4b9]">Discover the address</p>
-          <H id="h-visit" className="mt-[18px] font-display text-[clamp(2.75rem,6vw,5.75rem)] leading-[0.98] tracking-[-0.02em]">Walk the Racecourse with us.</H>
+          <H id="h-visit" className="mt-[18px] font-display text-[clamp(2.5rem,5vw,4.5rem)] font-medium leading-[1.02] tracking-[-0.035em]">Walk the Racecourse with us.</H>
           <p className="mt-7 max-w-[440px] text-accent-100">A private visit, a conversation on availability and pricing, and the plan in person. {project.contact.hours}.</p>
           <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-3 text-[15px]">
             <TrackedAnchor href={telHref(project.contact.phone)} event="call_click" params={{ cta_source: "visit_section" }} className="link-u py-2.5">Call {project.contact.phoneDisplay}</TrackedAnchor>

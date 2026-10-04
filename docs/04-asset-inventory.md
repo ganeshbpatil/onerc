@@ -1,5 +1,21 @@
 # 04 — Asset Inventory
 
+> **How assets reach the site:** `scripts/fetch-assets.mjs` downloads everything listed in `scripts/assets.manifest.mjs` from the reference sites on the server, during `deploy/install.sh` and every release. Files are saved under **local names** in `shared/images/`. To use SKYi's Google Drive originals instead, drop files with the same local names into that folder. Local name → source:
+>
+> | Local name | Source file (Site A `wp-content/uploads`) | Used in |
+> |---|---|---|
+> | `hero-desktop.webp` / `hero-mobile.webp` | `2026/10/1plus-by-skyi-laptop-1.webp` / `1-plus-by-skyi-mobile-1.webp` | Hero (art-directed) |
+> | `living-room.webp` | `2026/10/before-gallery-Living-Room-Banner-laptop-1.webp` | Design section, gallery |
+> | `plan-day.webp` / `plan-night.webp` / `unit-plan.webp` | `iso-day.webp` / `iso-night.webp` / `2024/08/unit-plan.webp` | Floor-plan viewer, gallery |
+> | `gallery-01…12.webp` | `2026/10/Gallery-Laptop-1*.webp` | Gallery |
+> | `club-gym / club-games / club-hall / club-kids / club-track.webp` | `gym / table-tennis / hall / kids-play-area / jogging-track.webp` | Club One explorer |
+> | `location-map.webp` | `2026/10/Location-Connectivity-Laptop.webp` | Location |
+> | `heritage-*.webp`, `heritage-srpf.png`, `racecourse-ground.png` | `2024/09/*` heritage photos | Address section, heritage timeline, gallery |
+> | `diagram-*.webp`, `skyi-logo.svg`, `one-plus-mark.webp` | `2024/09/*`, `2024/08/sky-i.svg`, `plus.webp` | Reserved (downloaded, not yet placed) |
+> | `One-Racecourse-Brochure.pdf` → `shared/private/` | Site B `/uploads/One-Racecourse-Brochure.pdf` | Gated brochure |
+>
+> **Review needed:** the twelve `Gallery-Laptop` files have no descriptive names on the source site, so their alt text is generic ("One Plus Home interior, view N"). Replace the alt text in `content/gallery.ts` once someone has looked at them.
+
 All assets are hosted on the reference sites. The listed dimensions are WordPress size variants taken from the filenames. Originals must be re-sourced from SKYi at master resolution; do not scrape the derivative copies. Every render must carry a "Computer-generated image" label, and externally sourced neighbourhood photos must say so (the brochure disclaimer already requires this).
 
 Base A = `https://mediumpurple-squirrel-394820.hostingersite.com/wp-content/uploads`

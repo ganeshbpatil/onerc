@@ -9,7 +9,7 @@ Quiet · architectural · exact · rooted · candid · unhurried · daylit.
 
 | | A · Editorial Heritage | **B · Precision Within Nature** | C · Nocturne |
 |---|---|---|---|
-| Type | Cormorant + Manrope | **Instrument Serif + Hanken Grotesk + IBM Plex Mono** | Syne |
+| Type | Cormorant + Manrope | **Google Sans + Montserrat (SKYi reference fonts)** | Syne |
 | Colour | Parchment, brass, umber | **Lime plaster, basalt, banyan green, one brass note** | Near-black, champagne |
 | Imagery | Archival, centred | **Full-bleed CGI with annotation, rules and grids** | Dusk renders, video |
 | Density | Low | **Low–medium, data-rich** | Very low |
@@ -68,20 +68,21 @@ Quiet · architectural · exact · rooted · candid · unhurried · daylit.
 | Brass ink / lime plaster | 5.1:1 |
 | Mist-2 / night | 8.0:1 |
 
-## Typography
+## Typography (reference fonts — unchanged from the SKYi site)
 
-| Role | Family | Size (375 → 1440) | Line height | Tracking |
+The live SKYi/Elementor site (Reference Website 1) sets `--e-global-typography-*-font-family: "Google Sans"` (self-hosted, 400/500/600/700) and loads **Montserrat** from Google Fonts. Those exact families are used here, self-hosted: Google Sans (SIL OFL 1.1) as one 36 KB Latin variable woff2 in `app/fonts/` via `next/font/local` (Google Fonts' build adds a control-character subset that delayed first paint by ~1 s), and Montserrat via `next/font/google`. No runtime calls to Google.
+
+| Role | Family | Size (375 → 1440) | Weight | Tracking |
 |---|---|---|---|---|
-| Display | Instrument Serif | 52 → 132 | 0.94 | −2.5% |
-| H2 | Instrument Serif | 40 → 84 | 1.0 | −2% |
-| H3 | Instrument Serif | 28 → 36 | 1.15 | 0 |
-| Lead | Hanken Grotesk 400 | 18 → 19 | 1.6 | 0 |
-| Body | Hanken Grotesk 400 | 16 → 17 | 1.6 | 0 |
-| Nav / button | Hanken Grotesk 500 | 14 → 15 | 1.2 | +2% |
-| Eyebrow / data / RERA | IBM Plex Mono 400 | 11 → 13 | 1.4 | +12–14%, uppercase |
-| Stat numerals | Instrument Serif | 40 → 52 | 1.0 | tabular |
+| Display (hero) | Google Sans | 44 → 104 | 500 | −3.5% |
+| H2 | Google Sans | 34 → 64 | 500 | −3% |
+| H3 | Google Sans | 24 → 30 | 500 | −1.5% |
+| Lead / body | Google Sans | 16 → 19 | 400 | 0 |
+| Nav / button | Google Sans | 14 → 15 | 500 | +1% |
+| Eyebrow / data / RERA / legal | Montserrat | 11 → 13 | 400–500 | +16%, uppercase for eyebrows; tabular figures |
+| Stat numerals | Google Sans | 38 → 46 | 500 | −3% |
 
-Rationale: Instrument Serif gives editorial authority with a narrow, architectural cut. Hanken Grotesk is a warm grotesk that is readable at 16px and avoids Inter, Roboto and Poppins. Plex Mono reads like drawing annotations and carries all data and legal text, which separates fact from voice. All three load through `next/font/google` with `display: swap` and Latin subsets.
+Reference Website 2 (React) renders its fonts client-side, so its families could not be read from this environment. If its typography differs and should take precedence, change the two `next/font` imports in `app/layout.tsx`; every component uses the `--font-display` / `--font-sans` / `--font-mono` tokens.
 
 ## Space, grid and shape
 - 4pt base. Section padding is `clamp(80px, 11vw, 160px)`. Gutter is `clamp(16px, 4vw, 40px)`. Container max is 1360px.

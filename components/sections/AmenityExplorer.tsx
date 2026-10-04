@@ -37,9 +37,9 @@ export function AmenityExplorer({ headingLevel = "h3" }: { headingLevel?: "h2" |
             aria-controls="amenity-panel"
             tabIndex={i === active ? 0 : -1}
             onClick={() => select(i)}
-            className={cn("flex items-baseline justify-between gap-3 border-b border-border py-5 text-left transition-colors", i === active ? "text-primary" : "text-[#6a6c66] hover:text-primary")}
+            className={cn("flex items-baseline justify-between gap-3 border-b border-border py-5 text-left transition-colors", i === active ? "text-primary" : "text-secondary hover:text-primary")}
           >
-            <span className="font-display text-[28px] leading-tight lg:text-[32px]">{a.name}</span>
+            <span className="font-display text-[22px] font-medium leading-tight tracking-[-0.015em] lg:text-[26px]">{a.name}</span>
             <span className={cn("font-mono text-xs", i === active ? "text-highlight-text" : "text-secondary")}>{String(i + 1).padStart(2, "0")}</span>
           </button>
         ))}

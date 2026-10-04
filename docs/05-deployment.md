@@ -1,95 +1,119 @@
-# 05 — Deployment: InMotion VPS
+# 05 — Deployment (InMotion VPS)
 
 ```
-Visitor → Cloudflare (DNS, WAF, CDN, TLS) → NGINX :443 (Origin cert, limit_req) → PM2 → Next.js 127.0.0.1:3000
-                                                                                            └→ /api/leads → Zoho Forms → Zoho CRM
+Visitor → (Cloudflare, optional) → NGINX :80/:443 (Let's Encrypt) → PM2 → Next.js standalone server 127.0.0.1:3000
+                                                                           ├→ /api/leads    → Zoho Forms → Zoho CRM
+                                                                           └→ /api/brochure → signed, expiring PDF link
 ```
 
-Node is never exposed publicly; NGINX is the only listener on 80/443.
+## Quick start (one command)
 
-## 1. Server baseline (Ubuntu 22.04/24.04)
+**Requirements:** root SSH access to a VPS running Ubuntu 22.04/24.04, Debian 12 or AlmaLinux/Rocky 8–9, and the domain's DNS **A record** pointing to the VPS IP (for SSL).
 
 ```bash
-# as root
-adduser deploy && usermod -aG sudo deploy
-apt update && apt -y upgrade
-apt -y install nginx git ufw fail2ban unattended-upgrades
-ufw allow OpenSSH && ufw allow 'Nginx Full' && ufw enable
-# SSH: key-only, no root login
-sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/; s/^#\?PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config && systemctl reload ssh
+# 1. Upload the package from your computer
+scp one-racecourse-deploy-0.1.0.tar.gz root@YOUR_SERVER_IP:/root/
 
-# Node.js LTS (22.x) via NodeSource, then PM2
-curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt -y install nodejs
-npm i -g pm2 && pm2 install pm2-logrotate
-pm2 set pm2-logrotate:max_size 20M && pm2 set pm2-logrotate:retain 14
+# 2. On the server
+ssh root@YOUR_SERVER_IP
+tar -xzf one-racecourse-deploy-0.1.0.tar.gz && cd one-racecourse
+DOMAIN=oneracecourse.com EMAIL=it@skyi.com bash deploy/install.sh
 ```
 
-**Hardening option:** restrict 443 to Cloudflare IP ranges in `ufw` so the origin cannot be hit directly.
+That single command:
+1. Installs NGINX, Node.js 22 LTS, PM2 and certbot, and adds 2 GB of swap on small VPSes.
+2. Creates a locked-down system user `oneracecourse` and the folder `/var/www/one-racecourse/{releases,shared,logs}`.
+3. Writes `/var/www/one-racecourse/shared/.env.production` with generated secrets and your domain.
+4. **Downloads every image and the brochure from the reference sites** into `shared/images` and `shared/private` (about 45 files, kept across releases).
+5. Builds the site, starts it under PM2 on `127.0.0.1:3000`, and health-checks it. If the check fails, it rolls back to the previous release.
+6. Configures NGINX for `DOMAIN` and `www.DOMAIN`, opens the firewall, and requests a **Let's Encrypt** certificate with automatic renewal.
+7. Enables PM2 on boot.
 
-## 2. App directories and secrets
+Open `https://www.oneracecourse.com`. Total time is about 5 minutes on a 2 vCPU / 2 GB VPS.
+
+| Option | Default | Meaning |
+|---|---|---|
+| `DOMAIN` | — (required) | Apex domain without `www` |
+| `EMAIL` | — | Turns on Let's Encrypt SSL (omit to stay on HTTP, for example behind Cloudflare Flexible) |
+| `WWW` | `1` | Serve `www.` as the canonical host (`0` = apex only) |
+| `PORT` | `3000` | Internal Node port (never public) |
+| `SSL` | `letsencrypt` if `EMAIL` set | `none` to skip |
+
+If SSL fails because DNS isn't live yet, fix DNS and **run the same command again**. Every re-run is safe.
+
+## Updating the site
+Upload the new package, extract it over the old folder and re-run the same `install.sh` command. Or, for config changes only:
 
 ```bash
-sudo mkdir -p /var/www/one-racecourse/{releases,shared} /var/log/one-racecourse
-sudo chown -R deploy:deploy /var/www/one-racecourse /var/log/one-racecourse
-# as deploy
-cp .env.example /var/www/one-racecourse/shared/.env.production   # fill real values
-chmod 600 /var/www/one-racecourse/shared/.env.production
-cp deploy/deploy.sh /var/www/one-racecourse/deploy.sh && chmod +x /var/www/one-racecourse/deploy.sh
+sudo nano /var/www/one-racecourse/shared/.env.production
+sudo -u oneracecourse APP_DIR=/var/www/one-racecourse bash /var/www/one-racecourse/current/deploy/release.sh /var/www/one-racecourse/source
 ```
 
-Give the VPS a read-only GitHub **deploy key** (`ssh-keygen -t ed25519`, add the public key under repo → Settings → Deploy keys).
-
-## 3. TLS and Cloudflare
-1. Set the domain's DNS in Cloudflare with an orange-cloud A record pointing to the VPS IP.
-2. Under SSL/TLS, choose **Full (strict)**. Create an **Origin Certificate** and save it to `/etc/ssl/cloudflare/origin.{pem,key}` (key `chmod 600`).
-3. Enable *Always Use HTTPS* and *HSTS* only after verifying the site. Cache rule: bypass `/api/*`; cache everything else per origin headers.
-4. Under WAF, add a rate-limiting rule on `POST /api/leads` (for example, 10/min/IP) as the outer layer.
-
-Alternative without Cloudflare: `certbot --nginx -d www.example.com` (Let's Encrypt), then adjust the cert paths in `nginx.conf`.
-
-## 4. NGINX
+Each release builds in its own folder. Traffic switches only after the health check passes, and the last four releases are kept. Manual rollback:
 
 ```bash
-sudo cp deploy/nginx.conf /etc/nginx/sites-available/one-racecourse
-sudo cp deploy/next-proxy.conf /etc/nginx/snippets/next-proxy.conf
-sudo ln -s /etc/nginx/sites-available/one-racecourse /etc/nginx/sites-enabled/
-sudo rm -f /etc/nginx/sites-enabled/default
-sudo nginx -t && sudo systemctl reload nginx
+cd /var/www/one-racecourse && ls releases/
+sudo -u oneracecourse ln -sfn /var/www/one-racecourse/releases/<older> current
+sudo -u oneracecourse APP_DIR=/var/www/one-racecourse pm2 reload current/deploy/ecosystem.config.cjs --update-env
 ```
 
-Populate `/etc/nginx/snippets/cloudflare-realip.conf` with `set_real_ip_from` lines for each Cloudflare range, then uncomment the include. Without it, every visitor shares Cloudflare's IP in rate limiting.
+## Images and the brochure
+- Downloaded automatically from the reference sites; the list is in `scripts/assets.manifest.mjs`.
+- **Using the SKYi Google Drive originals instead** (recommended for quality): copy the files into `/var/www/one-racecourse/shared/images/` **using the same file names** (for example `hero-desktop.webp`, `club-gym.webp`; full list in docs/04), run `chown -R oneracecourse: /var/www/one-racecourse/shared`, then run the update command above. Any image format works if the name matches; `.jpg` or `.png` files need the name changed in `content/*.ts`.
+- If a file is missing, its slot shows a labelled placeholder instead of a broken image.
+- Brochure: `shared/private/One-Racecourse-Brochure.pdf`. It is never public. Visitors get a 24-hour signed link only after submitting the form.
 
-## 5. First deploy and PM2 boot persistence
+## Leads → Zoho (check before launch)
+`.env.production` ships pointing at **SKYi's live Zoho web form**, the same CRM field schema as the 5 Racecourse form. Each lead carries these hidden routing fields:
+
+```
+Project=One Racecourse · Sales Project=ONE RACECOURSE · Lead Source=DIGITAL · Sub Source=SKYi Websites · Origin=Digital
+```
+
+plus UTM ×5, gclid, fbclid, landing page and referrer.
+
+**Ask SKYi's CRM admin to clone that form as "One Racecourse"** and paste the new URL into `ZOHO_FORMS_SUBMIT_URL`. Until then, leads arrive through the 5 Racecourse form but are tagged One Racecourse.
+
+If Zoho is unreachable, leads are never lost: they fall back to the webhook (if set) and then to the log. Find them with:
 
 ```bash
-/var/www/one-racecourse/deploy.sh main        # npm ci → check → build → symlink → pm2 reload → health check
-pm2 startup systemd -u deploy --hp /home/deploy   # run the printed sudo command once
-pm2 save
+grep lead.fallback /var/www/one-racecourse/logs/out.log
 ```
 
-`deploy.sh` builds each release in its own directory, so the live site keeps serving during the build. It refuses to go live if lint, typecheck or tests fail, rolls back automatically if the health check fails, and keeps the last five releases. Manual rollback: `ln -sfn <older release> current && pm2 reload one-racecourse`.
+## cPanel / WHM servers
+If the VPS runs cPanel, Apache owns ports 80/443 and the installer stops with a notice rather than breaking the server. Options:
 
-## 6. CI/CD
-`.github/workflows/ci.yml` runs on every PR and on push to `main`: lint → typecheck → unit tests → build. Only after all of these pass on `main` does the `deploy` job SSH to the VPS and run `deploy.sh <sha>`.
+1. **Recommended:** ask InMotion for a plain Ubuntu "Cloud VPS" and use the quick start.
+2. **cPanel → Setup Node.js App** (CloudLinux/Passenger):
+   - Upload and extract the package to `~/one-racecourse`. In cPanel Terminal, run:
+     ```bash
+     cd ~/one-racecourse && cp deploy/env.production.template .env.production   # edit DOMAIN/secrets
+     npm ci && npm run build
+     ```
+   - In *Setup Node.js App*: Node 22, Application root `one-racecourse/.next/standalone`, startup file `server.js`, application URL = your domain. Add the variables from `.env.production` under *Environment variables*, then click **Restart**.
+   - Builds need about 1.5 GB of RAM. If the cPanel account is limited, build on your computer (`npm ci && npm run build`) and upload `.next/standalone` instead.
 
-Required GitHub secrets (in the `production` environment, ideally with required reviewers): `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_PORT`.
+## Behind Cloudflare
+Set SSL mode to **Full (strict)** once Let's Encrypt is installed. Then uncomment `include /etc/nginx/snippets/cloudflare-realip.conf;` in `/etc/nginx/sites-available/one-racecourse.conf` so rate limits see real visitor IPs, and reload NGINX.
 
-## 7. Operations
+## Operations
 
-| Concern | Setup |
+| Task | Command |
 |---|---|
-| Logs | `pm2 logs one-racecourse`; files in `/var/log/one-racecourse` (rotated). Fallback leads are logged as `lead.fallback`, so grep for that string daily until a monitoring alert covers it |
-| Uptime | Use Better Stack / UptimeRobot to check `/` every minute, plus a synthetic `POST /api/leads` from a monitoring IP weekly |
-| Backups | The app is stateless (leads live in Zoho). Back up `/var/www/one-racecourse/shared/.env.production` and `/etc/nginx` to encrypted off-site storage. Turn on InMotion VPS snapshots weekly |
-| Updates | `unattended-upgrades` for the OS; run `npm outdated` monthly, then deploy through CI |
-| Security | Secure headers (CSP, HSTS, XFO, nosniff, Referrer-Policy, Permissions-Policy) are set in `next.config.ts`; rate limiting at Cloudflare, NGINX and the app; Zod validation server-side; honeypot plus time-to-submit check; Origin check (CSRF); secrets only in `.env.production` (never `NEXT_PUBLIC_*`) |
+| Status / logs | `sudo -u oneracecourse pm2 ls` · `sudo -u oneracecourse pm2 logs one-racecourse` |
+| Restart | `sudo -u oneracecourse pm2 restart one-racecourse` |
+| NGINX logs | `/var/log/nginx/one-racecourse.{access,error}.log` |
+| Renew SSL (automatic) | `certbot renew --dry-run` to test |
+| Backups | The app is stateless (leads live in Zoho). Back up `/var/www/one-racecourse/shared/` (env, images, brochure) and turn on InMotion snapshots |
 
-## 8. Pre-launch checklist
-- [ ] `NEXT_PUBLIC_SITE_URL` set to the final domain (canonical URLs, sitemap and OG all depend on it)
-- [ ] Zoho Forms submit URL and field map verified with a test lead that reaches CRM, including UTM fields
-- [ ] Zoho form CAPTCHA disabled (server-side posting) and a notification email configured
-- [ ] `BROCHURE_URL` points to a compressed PDF on a CDN
-- [ ] GTM container published (see 07); consent mode verified in Tag Assistant
-- [ ] All `[CONTENT REQUIRED]` items resolved: `grep -rn "CONTENT REQUIRED" content app components`
-- [ ] Real imagery placed in `/public/images` and `src` set in `content/*.ts`
-- [ ] Legal sign-off on RERA disclosures, privacy policy and terms
+## Security in place
+- Node listens only on `127.0.0.1` and runs as an unprivileged user.
+- Secrets live only in `shared/.env.production` (chmod 600).
+- Security headers: CSP, HSTS, X-Frame-Options, nosniff, Referrer-Policy and Permissions-Policy.
+- Lead endpoint protection: rate limits at NGINX and in the app, server-side Zod validation, a honeypot, a minimum time-to-submit, and an Origin check against CSRF.
+- The brochure link is HMAC-signed and expires.
+
+## CI/CD (optional)
+`.github/workflows/ci.yml` runs lint, typecheck, tests and a build on every PR. To enable auto-deploy on `main`:
+1. Clone the repo into `/var/www/one-racecourse/source` on the server, as `oneracecourse`, with a read-only deploy key.
+2. Add `VPS_HOST`, `VPS_USER` (`oneracecourse`), `VPS_SSH_KEY` and `VPS_PORT` secrets to the GitHub `production` environment.
