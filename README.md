@@ -1,6 +1,11 @@
 # One Racecourse by SKYi — launch website
 
-## Deploy to a server (one command)
+## Check locally → deploy
+
+- **Hostinger Cloud (hPanel Node.js Apps):** see [docs/08-hostinger-and-local.md](docs/08-hostinger-and-local.md). Run `npm run assets && npm run package:hostinger` to build the upload zip.
+- **Local check:** `npm ci && npm run assets && npm run build && npm start`, then open http://localhost:3000.
+
+## Deploy to a VPS (one command)
 
 ```bash
 scp one-racecourse-deploy-*.tar.gz root@SERVER:/root/ && ssh root@SERVER
